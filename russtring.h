@@ -1,0 +1,45 @@
+#include <avr/pgmspace.h>
+
+const char NOVOE[]PROGMEM="мнбне";
+
+const char RABOTA[]PROGMEM="пюанрю1";
+const char AVARIYA[]PROGMEM="юбюпхъ";
+const char NEISPRAVNOST[]PROGMEM="мехяопюбмнярэ";
+const char MENU[]PROGMEM="лемч";
+const char NA_SVYAZI[]PROGMEM="мю ябъгх";
+const char ARHIV[]PROGMEM="юпухб";
+const char NASTROYKA[]PROGMEM="мюярпнийю";
+const char BDZ[]PROGMEM="адг";
+const char VOD[]PROGMEM="бнд";
+const char DVX[]PROGMEM="дбу";
+const char RELE[]PROGMEM="пеке";
+const char DATAVREMYA[]PROGMEM="дюрю/бпелъ";
+const char SCANIROVANIE[]PROGMEM="яйюмхпнбюмхе";
+const char PROGRAMMIROVANIE[]PROGMEM="опнцпюллхпнбюмхе";
+const char SVYAZ[]PROGMEM="ябъгэ RS485";
+const char REZHIM[]PROGMEM="пефхл";
+const char RTU_M[]PROGMEM="RTU";
+const char ASCII_M[]PROGMEM="ASCII";
+const char SKOROST[]PROGMEM="яйнпнярэ";
+const char CHETNOST[]PROGMEM="вермнярэ";
+const char C_ODD[]PROGMEM="ODD";
+const char C_EVEN[]PROGMEM="EVEN";
+const char C_NONE[]PROGMEM="NONE";
+const char DLYA_VSEH[]PROGMEM="дкъ бяеу";
+const char PO_ODNOMU[]PROGMEM="он ндмнлс";
+const char ADRES[]PROGMEM="юдпея";
+const char VREMYA_MTZ[]PROGMEM="бпелъ лрг";
+const char VREMYA_UROV[]PROGMEM="бпелъ спнб";
+const char NET_GOTOVNOSTI[]PROGMEM="мер цнрнбмнярх";
+const char OSHIBKA[]PROGMEM="НЬХАЙЮ";
+const char NET_SVYAZI[]PROGMEM="МЕР ЯБЪГХ";
+const char NET[]PROGMEM="МЕР";
+const char SBROSIT[]PROGMEM="яАПНЯХРЭ? ДЮ-\"ббнд\"";
+const char OBNARUZHENO[]PROGMEM="НАМЮПСФЕМН адг:";
+const char PUSTO[]PROGMEM="<ОСЯРН>";
+const char VKL_MTZ[]PROGMEM="БЙК.лрг:";
+const char OTKL_MTZ[]PROGMEM="НРЙК.лрг:";
+const char MS[]PROGMEM="ЛЯ";
+const char PAROL[]PROGMEM="оюпнкэ";
+const char NOVOE_ZNACHENIE[]PROGMEM="мнбне гмювемхе";
+const char NEDOSTUPNO[]PROGMEM="МЕДНЯРСОМН";
