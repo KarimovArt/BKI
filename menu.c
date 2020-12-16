@@ -580,13 +580,18 @@ static void change_param(unsigned char nParam)
 	signed int param,max;
 
 	scansys();
-	printMenuHeader(NOVOE_ZNACHENIE);
 	//считаем кол-во БДЗ инлайн
 	for(unsigned char i=1;i<MAXQDEV;i++) if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL)) {numBDZ++;/*addr=readID(i);*/}
 
-	addr=numm();
+	addr=numm();//адрес БДЗ в котором будем менять, если addr=0 значит запрос широковещательный
 
-	switch(numBDZ)
+	if(nParam==0 && addr==0) {printUNAVALIABLE();_delay_ms(2000);return;} //нельзя менять адрес во всех БДЗ разом
+	if (addr!=0) //если запрос не широковещательный, то считываем показания БДЗ под № "addr"
+	{
+		if((send_prog(addr,NULL) <0)||(inSysBDZ[addr].data[0] !=PROG))	{printTOUT();_delay_ms(2000);return;}
+	}
+
+	/*switch(numBDZ)
 	{
 	//если БДЗ не обнаружены
 	case 0: {printTOUT();_delay_ms(2000);return;}
@@ -601,7 +606,7 @@ static void change_param(unsigned char nParam)
 		if(nParam==0){printUNAVALIABLE();_delay_ms(2000);return;}	//если была попытка изменить адрес пишем "недоступно" и вываливаемся
 	}
 	break;
-	}
+	}*/
 
 	switch(nParam)
 	{
@@ -611,7 +616,9 @@ static void change_param(unsigned char nParam)
 	//время МТЗ:если на связи 1 БДЗ пишем его время МТЗ, если больше то 0мс
 	case 1:
 	{
-		param=(numBDZ==1)?((signed int)inSysBDZ[addr].data[2]<<8 | inSysBDZ[addr].data[3]):(0);
+		param=(signed int)inSysBDZ[addr].data[2]<<8 | inSysBDZ[addr].data[3];
+		if(addr==0) param=0;
+		//param=(numBDZ==1)?((signed int)inSysBDZ[addr].data[2]<<8 | inSysBDZ[addr].data[3]):(0);
 		inSysBDZ[addr].data[4]=inSysBDZ[addr].data[5]=-1;	//в неизменяемый параметр пишем -1
 		max=30000;
 		step=10;
