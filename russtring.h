@@ -1,6 +1,7 @@
 #include <avr/pgmspace.h>
 
 const char NOVOE[]PROGMEM="мнбне";
+const char NUMM[]PROGMEM="мнлеп адг";
 
 const char RABOTA[]PROGMEM="пюанрю1";
 const char AVARIYA[]PROGMEM="юбюпхъ";

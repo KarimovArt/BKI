@@ -38,7 +38,7 @@
  static inline void printUNAVALIABLE(void);
  static inline unsigned char whileKey(void);
  static unsigned char passwd(void);
-
+ static unsigned char numm(void);
 
  static void reset(unsigned char);
  static unsigned char viewArch(unsigned char currBDZaddr,unsigned char index);
@@ -581,9 +581,10 @@ static void change_param(unsigned char nParam)
 
 	scansys();
 	printMenuHeader(NOVOE_ZNACHENIE);
-
 	//считаем кол-во БДЗ инлайн
-	for(unsigned char i=1;i<MAXQDEV;i++) if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL)) {numBDZ++;addr=readID(i);}
+	for(unsigned char i=1;i<MAXQDEV;i++) if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL)) {numBDZ++;/*addr=readID(i);*/}
+
+	addr=numm();
 
 	switch(numBDZ)
 	{
@@ -883,4 +884,27 @@ static unsigned char passwd(void)
 	return 0;
 }
 
+static unsigned char numm(void)
+{
+	unsigned char i=0;
+	printMenuHeader(NUMM);	//прорисовываем заголовок
+	while (1)
+	{
+		char str[2];
+		LCD_gotoXY(0,2);
+		sprintf(str,"%02d",i);
+		LCD_puts(str,4);
 
+		switch( whileKey() )	//висим тут пока не нажмется-отпустится кнопка (или автовыход)
+		{
+		case DOWN:if(i==0) i=99; else i--;
+		break;
+		case UP:if(i==99) i=0; else i++;
+		break;
+		case ENT:return i;	//выход по ENT (отсылка новых параметров)
+		break;
+		case NOKEY:asm("jmp 0");
+		break;
+		}
+	}
+}
