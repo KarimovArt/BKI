@@ -577,7 +577,7 @@ static void change_param(unsigned char nParam)
 {
 	signed char numBDZ=0;	//кол-во инлайновых БДЗ;
 	unsigned char addr=0xFF,step;
-	signed int param,max;
+	signed int param=0,max,staroe=0;
 
 	scansys();
 	//считаем кол-во БДЗ инлайн
@@ -591,33 +591,16 @@ static void change_param(unsigned char nParam)
 		if((send_prog(addr,NULL) <0)||(inSysBDZ[addr].data[0] !=PROG))	{printTOUT();_delay_ms(2000);return;}
 	}
 
-	/*switch(numBDZ)
-	{
-	//если БДЗ не обнаружены
-	case 0: {printTOUT();_delay_ms(2000);return;}
-	break;
-	//если обнаружен один БДЗ читаем его параметры //дождались таймаута или неправильного ответа -третья строка-"нет связи"
-	case 1: if((send_prog(addr,NULL) <0)||(inSysBDZ[addr].data[0] !=PROG))	{printTOUT();_delay_ms(2000);return;}
-	break;
-	//если БДЗ больше одного
-	default:
-	{
-		addr=0;														//устанавливаем широковещат.адрес
-		if(nParam==0){printUNAVALIABLE();_delay_ms(2000);return;}	//если была попытка изменить адрес пишем "недоступно" и вываливаемся
-	}
-	break;
-	}*/
-
 	switch(nParam)
 	{
 	//изменение адреса
-	case 0:{param=inSysBDZ[addr].data[1];max=99;step=1;}
+	case 0:{staroe=inSysBDZ[addr].data[1];max=99;step=1;}
 	break;
 	//время МТЗ:если на связи 1 БДЗ пишем его время МТЗ, если больше то 0мс
 	case 1:
 	{
-		param=(signed int)inSysBDZ[addr].data[2]<<8 | inSysBDZ[addr].data[3];
-		if(addr==0) param=0;
+
+		staroe=(signed int)inSysBDZ[addr].data[2]<<8 | inSysBDZ[addr].data[3];
 		//param=(numBDZ==1)?((signed int)inSysBDZ[addr].data[2]<<8 | inSysBDZ[addr].data[3]):(0);
 		inSysBDZ[addr].data[4]=inSysBDZ[addr].data[5]=-1;	//в неизменяемый параметр пишем -1
 		max=30000;
@@ -627,7 +610,8 @@ static void change_param(unsigned char nParam)
 	//время УРОВ:если на связи 1 БДЗ пишем его время УРОВ, если больше то 0мс
 	case 2:
 	{
-		param=(numBDZ==1)?((signed int)inSysBDZ[addr].data[4]<<8 | inSysBDZ[addr].data[5]):(0);
+		staroe=(signed int)inSysBDZ[addr].data[4]<<8 | inSysBDZ[addr].data[5];
+		//param=(numBDZ==1)?((signed int)inSysBDZ[addr].data[4]<<8 | inSysBDZ[addr].data[5]):(0);
 		inSysBDZ[addr].data[2]=inSysBDZ[addr].data[3]=-1;	//в неизменяемый параметр пишем -1
 		max=30000;
 		step=10;
@@ -639,9 +623,23 @@ static void change_param(unsigned char nParam)
 	while(1)
 	{
 		char str[6];
-		printMenuHeader(NOVOE_ZNACHENIE);
-		sprintf(str,"%d",param);
+		LCD_clr();
+		if(addr!=0)
+		{
+			LCD_gotoXY(0,0);
+			LCD_puts_P(STAROE_ZNACHENIE,16);
+			LCD_putchar(0x3A);
+			sprintf(str,"%d",staroe);
+			LCD_gotoXY(0,1);
+			LCD_puts(str,strlen(str));
+			if(nParam!=0)LCD_puts_P(MS,2);
+		}
+
 		LCD_gotoXY(0,2);
+		LCD_puts_P(NOVOE_ZNACHENIE,strlen_P(NOVOE_ZNACHENIE));
+		LCD_putchar(0x3A);
+		sprintf(str,"%d",param);
+		LCD_gotoXY(0,3);
 		LCD_puts(str,strlen(str));
 		if(nParam!=0)LCD_puts_P(MS,2);
 		switch( whileKey() )	//висим тут пока не нажмется-отпустится кнопка (или автовыход)
@@ -660,10 +658,13 @@ static void change_param(unsigned char nParam)
 	}
 SEND:
 	//отсылка новых параметров
+	//if(eeprom_read_byte(&inSysBDZaddr[addr])!=0) {LCD_clr(); LCD_gotoXY(0,0);LCD_puts_P(OSHIBKA_ADDR,20);_delay_ms(2000);return;}
+
 	inSysBDZ[addr].data[0]=PROG;
 	switch(nParam)
 	{
-	case 0:inSysBDZ[addr].data[1]=param;
+	case 0:	if(readID(param)!=0) {LCD_clr(); LCD_gotoXY(0,0);LCD_puts_P(OSHIBKA_ADDR,20);_delay_ms(2000);return;}
+			inSysBDZ[addr].data[1]=param;
 	break;
 	case 1:{inSysBDZ[addr].data[2]=param >>8; inSysBDZ[addr].data[3]=param & 0x00FF;}
 	break;
@@ -673,9 +674,6 @@ SEND:
 	}
 	if((send_prog(addr,inSysBDZ[addr].data)<0) && (param!=0)){printTOUT();_delay_ms(2000);return;}
 	scansys();
-
-
-
 
 	return;
 }

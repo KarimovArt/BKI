@@ -2,6 +2,8 @@
 
 const char NOVOE[]PROGMEM="мнбне";
 const char NUMM[]PROGMEM="мнлеп адг";
+const char STAROE_ZNACHENIE[]PROGMEM="ярюпне гмювемхе";
+const char OSHIBKA_ADDR[]PROGMEM="ньхайю ЮДПЕЯ ГЮМЪР";
 
 const char RABOTA[]PROGMEM="пюанрю1";
 const char AVARIYA[]PROGMEM="юбюпхъ";
