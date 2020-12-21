@@ -10,7 +10,6 @@
 };
 #define NUMOFMENUSTRING 3	//количество строк меню(не считая заголовка)
 
- static void novoe(void);
  static void in_line(void);
  static void alarm(void);
  static void fault(void);
@@ -27,6 +26,7 @@
  static void skorost(void);
  static void chetnost(void);
  static void change_param(unsigned char nParam);
+ static void change_logic(void);
 // static void dlya_vseh(void);
 // static void po_odnomu(void);
 
@@ -39,9 +39,20 @@
  static inline unsigned char whileKey(void);
  static unsigned char passwd(void);
  static unsigned char numm(void);
+ static inline unsigned char printOut(unsigned char numm);
+ static void vod1(void);
+ static void vod2(void);
+ static void vod3(void);
+ static void vod4(void);
+ static void dvx1(void);
+ static void dvx2(void);
+ static void dvx3(void);
+
+
 
  static void reset(unsigned char);
  static unsigned char viewArch(unsigned char currBDZaddr,unsigned char index);
+ int adress;
 
 // struct menu LVL_dlya_vseh[]=
 // {
@@ -66,6 +77,7 @@ struct menu LVL_prog[]=
 	{ADRES,adres},
 	{VREMYA_MTZ,vremya_mtz},
 	{VREMYA_UROV,vremya_urov},
+	{LOGIKA,change_logic},
 	{NULL,NULL}		//затычка
 };
 
@@ -76,7 +88,6 @@ struct menu LVL_prog[]=
 	 {SCANIROVANIE,scansys},
 	 {PROGRAMMIROVANIE,progsys},
 	 {SVYAZ,svyaz},
-	 {NOVOE, novoe},
 	 {NULL,NULL}	//затычка
  };
  struct menu LVL_svyaz[]=
@@ -87,6 +98,19 @@ struct menu LVL_prog[]=
  	 {CHETNOST,chetnost},
  	 {NULL,NULL}	//затычка
   };
+
+ struct menu LVL_in[]=
+   {
+  	 {SVYAZ,NULL},
+  	 {VOD1,vod1},
+  	 {VOD2,vod2},
+  	 {VOD3,vod3},
+  	 {VOD4,vod4},
+	 {DVX1,dvx1},
+	 {DVX2,dvx2},
+	 {DVX3,dvx3},
+	 {NULL,NULL}//затычка
+   };
 
 
 /*********************************** УРОВЕНЬ 0 ***********************************/
@@ -100,12 +124,35 @@ struct menu LVL_main[]=	////кол-во пунктов уровня 0 (осно�
 	{NASTROYKA,nastroyka},
 	{NULL,NULL}	//затычка
 };
-static void novoe(void)
+
+static void vod1(void)
 {
-
-
+	printOut(1);
 }
-
+static void vod2(void)
+{
+	printOut(2);
+}
+static void vod3(void)
+{
+	printOut(3);
+}
+static void vod4(void)
+{
+	printOut(4);
+}
+static void dvx1(void)
+{
+	printOut(5);
+}
+static void dvx2(void)
+{
+	printOut(6);
+}
+static void dvx3(void)
+{
+	printOut(7);
+}
 static inline void printMenuHeader(PGM_P name)
 {
 	//прорисовываем заголовок "NAME:"
@@ -176,6 +223,83 @@ void naviMenu(struct menu *level)
 }
 
 
+static void change_logic(void)
+{
+	unsigned char numBDZ=0;
+	//scansys();//сканируем сеть
+	//считаем кол-во БДЗ инлайн(в сети)
+	for(unsigned char i=1;i<MAXQDEV;i++) if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL)) numBDZ++;
+	//if (numBDZ>1)
+	*&adress=numm();//если бдз в сети >1 то запрашиваем адрес БДЗ в котором будем менять п-тры
+	//addr=*&adress;
+	if (*&adress!=0) //если запрос не широковещательный(адресс не 0), то считываем показания БДЗ под № "addr"
+		{
+			unsigned char data[6]={PROG};
+			inSysBDZ[*&adress].flags=1<<FLT;
+			CAN_loadTXbuf((unsigned long int)*&adress,2,data,CAN_TX_PRIORITY_3 & CAN_SID_FRAME);
+			if((checkTOUT(*&adress) <0)||(inSysBDZ[*&adress].data[0] !=PROG)){printTOUT();_delay_ms(2000);return;}
+		}
+	naviMenu(LVL_in);
+	return;
+}
+static inline unsigned char printOut(unsigned char numm)
+{
+	//int *addr=&adress;
+	char n[10];
+	LCD_clr();
+	LCD_gotoXY(0,0);
+	itoa(inSysBDZ[*&adress].data[numm],n,2);
+	LCD_puts(n, 10);
+	LCD_gotoXY(0,2);
+	itoa(*&adress,n,10);
+	LCD_puts(n, 10);
+	_delay_ms(5000);
+	return 0;
+
+	/*while(1)
+	{
+		unsigned char j=0;
+		for(unsigned char i=1;i<20;i=i+5)
+		{
+			j++;
+			LCD_gotoXY(i,2);
+			LCD_puts_P(VOD,3);
+			LCD_gotoXY(i+1,2);
+			LCD_puts(itoa(j,n,10),2);
+			LCD_gotoXY(i,3);
+
+		}
+		LCD_gotoXY(0,cursorPos);			//и курсор (символ >)
+		LCD_putchar(0x84);
+		switch( whileKey() )	//висим тут пока не нажмется-отпустится кнопка (или автовыход)
+		{
+		case DOWN:
+		{
+			if(currPunkt < numPunkt)
+			{
+				++currPunkt;
+				(cursorPos < NUMOFMENUSTRING)?(cursorPos++):(screenPos++);
+			}
+		}
+		break;
+		case UP:
+		{
+			if(currPunkt > 1 )
+			{
+				--currPunkt;
+				(cursorPos > 1)?(cursorPos--):(screenPos--);
+			}
+		}
+		break;
+		case ENT:(level+currPunkt)->pFunc();	//-запускаем функцию выбранного пункта	(она также может вызвать naviMenu -следующий подуровень)
+		break;
+		case ESC:return;	//выход по ESC
+		break;
+		case NOKEY:asm("jmp 0");	//автовыход
+		break;
+		}
+	}*/
+}
 
 static inline unsigned char printSubMenu(const char *flashName,unsigned char flag)
 {
@@ -445,6 +569,7 @@ static void scansys(void)
 
 static void progsys(void)
 {
+	scansys();
 	naviMenu(LVL_prog);
 }
 
@@ -576,14 +701,14 @@ static void chetnost(void)
 static void change_param(unsigned char nParam)
 {
 	signed char numBDZ=0;	//кол-во инлайновых БДЗ;
-	unsigned char addr=0xFF,step;
+	unsigned char addr=0,step;
 	signed int param=0,max,staroe=0;
 
-	scansys();
+	//scansys();
 	//считаем кол-во БДЗ инлайн
 	for(unsigned char i=1;i<MAXQDEV;i++) if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL)) {numBDZ++;/*addr=readID(i);*/}
 
-	addr=numm();//адрес БДЗ в котором будем менять, если addr=0 значит запрос широковещательный
+	if (numBDZ>1) addr=numm();//адрес БДЗ в котором будем менять, если addr=0 значит запрос широковещательный
 
 	if(nParam==0 && addr==0) {printUNAVALIABLE();_delay_ms(2000);return;} //нельзя менять адрес во всех БДЗ разом
 	if (addr!=0) //если запрос не широковещательный, то считываем показания БДЗ под № "addr"
@@ -599,7 +724,6 @@ static void change_param(unsigned char nParam)
 	//время МТЗ:если на связи 1 БДЗ пишем его время МТЗ, если больше то 0мс
 	case 1:
 	{
-
 		staroe=(signed int)inSysBDZ[addr].data[2]<<8 | inSysBDZ[addr].data[3];
 		//param=(numBDZ==1)?((signed int)inSysBDZ[addr].data[2]<<8 | inSysBDZ[addr].data[3]):(0);
 		inSysBDZ[addr].data[4]=inSysBDZ[addr].data[5]=-1;	//в неизменяемый параметр пишем -1

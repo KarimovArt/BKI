@@ -11,6 +11,8 @@ void ping(void);
 signed char send_cmd(unsigned char addr,unsigned char cmd);
 signed char send_read_arch(unsigned char part,unsigned char addr,unsigned char index);
 static inline signed char checkTOUT(unsigned char addr);
+signed char aks_for_logic(unsigned char addr);
+
 
 void ping(void)
 {
@@ -48,6 +50,18 @@ signed char send_prog(unsigned char addr,volatile unsigned char *param)
 	//перед посылкой команды обнуляем флаги ALM,INL,устанавливаем FLT.Установленный флаг INL будет говорить о том,что ответ принят
 	inSysBDZ[addr].flags=1<<FLT;
 	CAN_loadTXbuf((unsigned long int)addr,(param != NULL)?(6):(1),data,CAN_TX_PRIORITY_3 & CAN_SID_FRAME);
+
+	//если программируем широковещательно то ответа не будет
+	return (addr==0)?(1):(checkTOUT(addr));
+}
+
+signed char aks_for_logic(unsigned char addr)
+{
+	unsigned char data[6]={PROG};
+
+	//перед посылкой команды обнуляем флаги ALM,INL,устанавливаем FLT.Установленный флаг INL будет говорить о том,что ответ принят
+	inSysBDZ[addr].flags=1<<FLT;
+	CAN_loadTXbuf((unsigned long int)addr,2,data,CAN_TX_PRIORITY_3 & CAN_SID_FRAME);
 
 	//если программируем широковещательно то ответа не будет
 	return (addr==0)?(1):(checkTOUT(addr));

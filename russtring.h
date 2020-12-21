@@ -4,6 +4,14 @@ const char NOVOE[]PROGMEM="мнбне";
 const char NUMM[]PROGMEM="мнлеп адг";
 const char STAROE_ZNACHENIE[]PROGMEM="ярюпне гмювемхе";
 const char OSHIBKA_ADDR[]PROGMEM="ньхайю ЮДПЕЯ ГЮМЪР";
+const char LOGIKA[]PROGMEM="кнцхйю пюанрш";
+const char VOD1[]PROGMEM="бнд1";
+const char VOD2[]PROGMEM="бнд2";
+const char VOD3[]PROGMEM="бнд3";
+const char VOD4[]PROGMEM="бнд4";
+const char DVX1[]PROGMEM="дбу1";
+const char DVX2[]PROGMEM="дбу2";
+const char DVX3[]PROGMEM="дбу3";
 
 const char RABOTA[]PROGMEM="пюанрю1";
 const char AVARIYA[]PROGMEM="юбюпхъ";
