@@ -12,6 +12,14 @@ const char VOD4[]PROGMEM="бнд4";
 const char DVX1[]PROGMEM="дбу1";
 const char DVX2[]PROGMEM="дбу2";
 const char DVX3[]PROGMEM="дбу3";
+const char ON[]PROGMEM="бйк";
+const char OFF[]PROGMEM="бшйк";
+const char CHOSE_EXT[]PROGMEM="бшундш";
+const char EXIT1[]PROGMEM="бшу1:";
+const char EXIT2[]PROGMEM="бшу2:";
+const char EXIT3[]PROGMEM="бшу3:";
+const char EXIT4[]PROGMEM="бшу4:";
+
 
 const char RABOTA[]PROGMEM="пюанрю1";
 const char AVARIYA[]PROGMEM="юбюпхъ";

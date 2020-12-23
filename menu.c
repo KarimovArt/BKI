@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "russtring.h"
 
+
 //тест история
  struct menu
 {
@@ -244,61 +245,104 @@ static void change_logic(void)
 }
 static inline unsigned char printOut(unsigned char numm)
 {
-	//int *addr=&adress;
-	char n[10];
-	LCD_clr();
-	LCD_gotoXY(0,0);
+
+	unsigned char x=0,y=1,punkt=0,value=0;
+	//char n[10];
+	/*LCD_gotoXY(0,0);
 	itoa(inSysBDZ[*&adress].data[numm],n,2);
 	LCD_puts(n, 10);
 	LCD_gotoXY(0,2);
 	itoa(*&adress,n,10);
 	LCD_puts(n, 10);
 	_delay_ms(5000);
-	return 0;
+	return 0;*/
 
-	/*while(1)
+	LCD_clr();
+	LCD_puts_P(CHOSE_EXT,10);
+	LCD_gotoXY(1,1);
+	LCD_puts_P(EXIT1,5);
+	LCD_gotoXY(11,1);
+	LCD_puts_P(EXIT2,5);
+	LCD_gotoXY(1,2);
+	LCD_puts_P(EXIT3,5);
+	LCD_gotoXY(11,2);
+	LCD_puts_P(EXIT4,5);
+
+	while(1)
 	{
-		unsigned char j=0;
-		for(unsigned char i=1;i<20;i=i+5)
-		{
-			j++;
-			LCD_gotoXY(i,2);
-			LCD_puts_P(VOD,3);
-			LCD_gotoXY(i+1,2);
-			LCD_puts(itoa(j,n,10),2);
-			LCD_gotoXY(i,3);
 
-		}
-		LCD_gotoXY(0,cursorPos);			//и курсор (символ >)
-		LCD_putchar(0x84);
+		if(punkt==0){LCD_gotoXY(0,1);LCD_putchar(0x84);}
+		LCD_gotoXY(6,1);
+		(value&(1<<0))?(LCD_puts_P(ON,4)):(LCD_puts_P(OFF,4));
+		LCD_gotoXY(16,1);
+		(value&(1<<1))?(LCD_puts_P(ON,4)):(LCD_puts_P(OFF,4));
+		LCD_gotoXY(6,2);
+		(value&(1<<2))?(LCD_puts_P(ON,4)):(LCD_puts_P(OFF,4));
+		LCD_gotoXY(16,2);
+		(value&(1<<3))?(LCD_puts_P(ON,4)):(LCD_puts_P(OFF,4));
+		LCD_gotoXY(0,3);
+		/*itoa(value,n,2);
+		LCD_puts(n, 10);*/
 		switch( whileKey() )	//висим тут пока не нажмется-отпустится кнопка (или автовыход)
 		{
 		case DOWN:
 		{
-			if(currPunkt < numPunkt)
-			{
-				++currPunkt;
-				(cursorPos < NUMOFMENUSTRING)?(cursorPos++):(screenPos++);
-			}
+			value&= ~(1<<punkt);
 		}
 		break;
 		case UP:
 		{
-			if(currPunkt > 1 )
+			value|= 1<<punkt;
+		}
+		break;
+		case RIGHT:
+		{
+			if((x+10)>10 && y!=2)
 			{
-				--currPunkt;
-				(cursorPos > 1)?(cursorPos--):(screenPos--);
+				LCD_gotoXY(x,y);
+				LCD_putchar(' ');
+				y++;x=0;punkt++;
+				LCD_gotoXY(x,y);
+				LCD_putchar(0x84);
+			}
+			else if(x!=10)
+			{
+				LCD_gotoXY(x,y);
+				LCD_putchar(' ');
+				punkt++;x+=10;
+				LCD_gotoXY(x,y);
+				LCD_putchar(0x84);
 			}
 		}
 		break;
-		case ENT:(level+currPunkt)->pFunc();	//-запускаем функцию выбранного пункта	(она также может вызвать naviMenu -следующий подуровень)
+		case LEFT:
+		{
+			if((x-10)<0 && y!=1)
+			{
+				LCD_gotoXY(x,y);
+				LCD_putchar(' ');
+				y--;x=10;punkt--;
+				LCD_gotoXY(x,y);
+				LCD_putchar(0x84);
+			}
+			else if(x!=0)
+			{
+				LCD_gotoXY(x,y);
+				LCD_putchar(' ');
+				punkt--;x-=10;
+				LCD_gotoXY(x,y);
+				LCD_putchar(0x84);
+			}
+		}
 		break;
-		case ESC:return;	//выход по ESC
+		case ENT:return value; 	//-запускаем функцию выбранного пункта	(она также может вызвать naviMenu -следующий подуровень)
+		break;
+		case ESC:return 0;	//выход по ESC
 		break;
 		case NOKEY:asm("jmp 0");	//автовыход
 		break;
 		}
-	}*/
+	}
 }
 
 static inline unsigned char printSubMenu(const char *flashName,unsigned char flag)
