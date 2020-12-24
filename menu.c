@@ -28,6 +28,7 @@
  static void chetnost(void);
  static void change_param(unsigned char nParam);
  static void change_logic(void);
+
 // static void dlya_vseh(void);
 // static void po_odnomu(void);
 
@@ -41,6 +42,8 @@
  static unsigned char passwd(void);
  static unsigned char numm(void);
  static inline unsigned char printOut(unsigned char numm);
+ void printRejim(unsigned char numm);
+ void printPodmenu(unsigned char numm);
  static void vod1(void);
  static void vod2(void);
  static void vod3(void);
@@ -53,7 +56,7 @@
 
  static void reset(unsigned char);
  static unsigned char viewArch(unsigned char currBDZaddr,unsigned char index);
- int adress;
+ int address;
 
 // struct menu LVL_dlya_vseh[]=
 // {
@@ -102,7 +105,7 @@ struct menu LVL_prog[]=
 
  struct menu LVL_in[]=
    {
-  	 {SVYAZ,NULL},
+  	 {CHOSE_ENT,NULL},
   	 {VOD1,vod1},
   	 {VOD2,vod2},
   	 {VOD3,vod3},
@@ -128,31 +131,31 @@ struct menu LVL_main[]=	////кол-во пунктов уровня 0 (осно�
 
 static void vod1(void)
 {
-	printOut(1);
+	printPodmenu(1);
 }
 static void vod2(void)
 {
-	printOut(2);
+	printPodmenu(2);
 }
 static void vod3(void)
 {
-	printOut(3);
+	printPodmenu(3);
 }
 static void vod4(void)
 {
-	printOut(4);
+	printPodmenu(4);
 }
 static void dvx1(void)
 {
-	printOut(5);
+	printPodmenu(5);
 }
 static void dvx2(void)
 {
-	printOut(6);
+	printPodmenu(6);
 }
 static void dvx3(void)
 {
-	printOut(7);
+	printPodmenu(7);
 }
 static inline void printMenuHeader(PGM_P name)
 {
@@ -223,42 +226,170 @@ void naviMenu(struct menu *level)
 	}
 }
 
-
 static void change_logic(void)
 {
+
 	unsigned char numBDZ=0;
-	//scansys();//сканируем сеть
+	scansys();
 	//считаем кол-во БДЗ инлайн(в сети)
-	for(unsigned char i=1;i<MAXQDEV;i++) if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL)) numBDZ++;
-	//if (numBDZ>1)
-	*&adress=numm();//если бдз в сети >1 то запрашиваем адрес БДЗ в котором будем менять п-тры
-	//addr=*&adress;
-	if (*&adress!=0) //если запрос не широковещательный(адресс не 0), то считываем показания БДЗ под № "addr"
+	for(unsigned char i=1;i<MAXQDEV;i++)
+		if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL))
+		{
+			numBDZ++;
+			//if(numBDZ==1) *&address=readID(i); //если в сети 1 БДЗ, то запоминаем его адресс. если найдет еще БДЗ, адрес дальше будет перезаписан
+		}
+	//if (numBDZ==0) return;
+	if (numBDZ>1) *&address=numm();//если бдз в сети >1 то запрашиваем адрес БДЗ в котором будем менять п-тры
+	/*if (*&address!=0) //если запрос не широковещательный(адресс не 0), то считываем показания БДЗ под № "addr"
 		{
 			unsigned char data[6]={PROG};
-			inSysBDZ[*&adress].flags=1<<FLT;
-			CAN_loadTXbuf((unsigned long int)*&adress,2,data,CAN_TX_PRIORITY_3 & CAN_SID_FRAME);
-			if((checkTOUT(*&adress) <0)||(inSysBDZ[*&adress].data[0] !=PROG)){printTOUT();_delay_ms(2000);return;}
-		}
+			inSysBDZ[*&address].flags=1<<FLT;
+			CAN_loadTXbuf((unsigned long int)*&address,2,data,CAN_TX_PRIORITY_3 & CAN_SID_FRAME);
+			if((checkTOUT(*&address) <0)||(inSysBDZ[*&address].data[0] !=PROG)){printTOUT();_delay_ms(2000);return;}
+		}*/
 	naviMenu(LVL_in);
 	return;
 }
-static inline unsigned char printOut(unsigned char numm)
+
+void printPodmenu(unsigned char numm)
+{
+	unsigned char y=1,punkt=0;
+	printMenuHeader(LOGIKA);
+	LCD_gotoXY(0,1);LCD_putchar(0x84);
+	LCD_gotoXY(1,1);LCD_puts_P(CHOSE_EXT,10);
+	LCD_gotoXY(1,2);LCD_puts_P(CONFIRM,20);
+	while(1)
+	{
+		switch( whileKey() )
+		{
+		case DOWN:
+		{
+			if(y==2)
+			{
+				LCD_gotoXY(0,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				punkt--; y--;
+				LCD_gotoXY(0,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
+			}
+			else
+			{
+				LCD_gotoXY(0,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				punkt++; y++;
+				LCD_gotoXY(0,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
+			}
+
+		}//DOWN
+		break;
+		case UP:
+		{
+			if(y==1)
+			{
+				LCD_gotoXY(0,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				punkt++; y++;
+				LCD_gotoXY(0,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
+			}
+			else
+			{
+				LCD_gotoXY(0,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				punkt--; y--;
+				LCD_gotoXY(0,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
+			}
+		}//UP
+		break;
+		case ENT:(y==1)?(printOut(numm)):(printRejim(numm));
+		break;
+		case ESC:return;	//выход по ESC
+		break;
+		case NOKEY:asm("jmp 0");	//автовыход
+		break;
+		}
+	}
+}
+
+void printRejim(unsigned char numm)
 {
 
+	unsigned char punkt=0;
+	char names[3][10]={{pgm_read_word(MTZ)},{pgm_read_word(YPOB)},{pgm_read_byte(OFF)}};
+
+	/*if (*&address!=0) //если запрос не широковещательный(адресс не 0), то считываем показания БДЗ под № "addr"
+		{
+			unsigned char data[6]={PROG};
+			inSysBDZ[*&address].flags=1<<FLT;
+			CAN_loadTXbuf((unsigned long int)*&address,2,data,CAN_TX_PRIORITY_3 & CAN_SID_FRAME);
+			printMenuHeader(WAIT);
+			if((checkTOUT(*&address) <0)||(inSysBDZ[*&address].data[0] !=PROG)){printTOUT();_delay_ms(2000);return;}
+		}*/
+	//if (*&address) value=inSysBDZ[*&address].data[numm];
+	printMenuHeader(CONFIRM);
+	LCD_gotoXY(1,0);
+	LCD_puts("АРВГШАВРШгШЩА", 20);
+	LCD_gotoXY(5,2);
+
+	while(1)
+		{
+			LCD_gotoXY(0,2);
+			LCD_puts(&names[punkt][0],20);
+			switch( whileKey() )
+			{
+			case DOWN:
+			{
+				if (punkt==2) punkt=0;
+				else punkt++;
+			}//DOWN
+			break;
+			case UP:
+			{
+				if (punkt==0) punkt=2;
+				else punkt --;
+			}//UP
+			break;
+			case ENT: return;
+			break;
+			case ESC:return;	//выход по ESC
+			break;
+			case NOKEY:asm("jmp 0");	//автовыход
+			break;
+			}
+		}
+}
+
+static inline unsigned char printOut(unsigned char numm)
+{
 	unsigned char x=0,y=1,punkt=0,value=0;
 	//char n[10];
-	/*LCD_gotoXY(0,0);
-	itoa(inSysBDZ[*&adress].data[numm],n,2);
+
+	/*itoa(inSysBDZ[*&address].data[numm],n,2);
 	LCD_puts(n, 10);
 	LCD_gotoXY(0,2);
-	itoa(*&adress,n,10);
+	itoa(*&address,n,10);
 	LCD_puts(n, 10);
 	_delay_ms(5000);
 	return 0;*/
 
-	LCD_clr();
-	LCD_puts_P(CHOSE_EXT,10);
+	if (*&address!=0) //если запрос не широковещательный(адресс не 0), то считываем показания БДЗ под № "addr"
+		{
+			unsigned char data[6]={PROG};
+			inSysBDZ[*&address].flags=1<<FLT;
+			CAN_loadTXbuf((unsigned long int)*&address,2,data,CAN_TX_PRIORITY_3 & CAN_SID_FRAME);
+			printMenuHeader(WAIT);
+			if((checkTOUT(*&address) <0)||(inSysBDZ[*&address].data[0] !=PROG)){printTOUT();_delay_ms(2000);return 0;}
+		}
+
+	if (*&address) value=inSysBDZ[*&address].data[numm];
+	//отрисовка выходов
+	printMenuHeader(CHOSE_EXT);
+	LCD_gotoXY(0,1);LCD_putchar(0x84);
+	/*LCD_clr();
+	LCD_gotoXY(0,0);
+	LCD_puts_P(CHOSE_EXT,10);*/
 	LCD_gotoXY(1,1);
 	LCD_puts_P(EXIT1,5);
 	LCD_gotoXY(11,1);
@@ -270,8 +401,8 @@ static inline unsigned char printOut(unsigned char numm)
 
 	while(1)
 	{
-
-		if(punkt==0){LCD_gotoXY(0,1);LCD_putchar(0x84);}
+		//отрисовка вкл/выкл
+		//if(punkt==0){LCD_gotoXY(0,1);LCD_putchar(0x84);}//это чтобы выставить курсор в первый пункт при первом попадании в цикл
 		LCD_gotoXY(6,1);
 		(value&(1<<0))?(LCD_puts_P(ON,4)):(LCD_puts_P(OFF,4));
 		LCD_gotoXY(16,1);
@@ -285,57 +416,76 @@ static inline unsigned char printOut(unsigned char numm)
 		LCD_puts(n, 10);*/
 		switch( whileKey() )	//висим тут пока не нажмется-отпустится кнопка (или автовыход)
 		{
-		case DOWN:
+		case DOWN: //вкл/выкл
 		{
-			value&= ~(1<<punkt);
+			(value&(1<<punkt))?(value&= ~(1<<punkt)):(value|= 1<<punkt); //меняем бит на 1/0 соответствующий текущему пункту
+			//value&= ~(1<<punkt);
 		}
 		break;
-		case UP:
+		case UP: //вкл/выкл
 		{
-			value|= 1<<punkt;
+			(value&(1<<punkt))?(value&= ~(1<<punkt)):(value|= 1<<punkt); //меняем бит на 1/0 соответствующий текущему пункту
+			//value|= 1<<punkt;
 		}
 		break;
-		case RIGHT:
+		case RIGHT: //перемещаемся в следующий пункт
 		{
-			if((x+10)>10 && y!=2)
+			if((x+10)>10 && y!=2) //перемещение для ВЫХ2 и ВЫХ4(в этом случае надо перескочить на другую строку)
 			{
-				LCD_gotoXY(x,y);
-				LCD_putchar(' ');
-				y++;x=0;punkt++;
-				LCD_gotoXY(x,y);
-				LCD_putchar(0x84);
+				LCD_gotoXY(x,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				y++;x=0;punkt++; //увеличиваем координату y(переходим в след строку), х обнуляем, меняем номер пункта
+				LCD_gotoXY(x,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
 			}
-			else if(x!=10)
+			else if(x!=10) //перемещение для ВЫХ1 и ВЫХ3(в этом случае надо перейти в соседний пункт на той же строке)
 			{
-				LCD_gotoXY(x,y);
-				LCD_putchar(' ');
-				punkt++;x+=10;
-				LCD_gotoXY(x,y);
-				LCD_putchar(0x84);
+
+				LCD_gotoXY(x,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				punkt++;x+=10; //увеличиваем координату x (переходим в соседний пункт), y не меняем, меняем номер пункта
+				LCD_gotoXY(x,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
 			}
-		}
-		break;
-		case LEFT:
-		{
-			if((x-10)<0 && y!=1)
+			else if(y==2)
 			{
-				LCD_gotoXY(x,y);
-				LCD_putchar(' ');
-				y--;x=10;punkt--;
-				LCD_gotoXY(x,y);
-				LCD_putchar(0x84);
-			}
-			else if(x!=0)
-			{
-				LCD_gotoXY(x,y);
-				LCD_putchar(' ');
-				punkt--;x-=10;
-				LCD_gotoXY(x,y);
-				LCD_putchar(0x84);
+				LCD_gotoXY(x,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				punkt=0; x=0; y=1;
+				LCD_gotoXY(x,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
 			}
 		}
 		break;
-		case ENT:return value; 	//-запускаем функцию выбранного пункта	(она также может вызвать naviMenu -следующий подуровень)
+		case LEFT: //возвращаемся в предыдущий пункт
+		{
+			if((x-10)<0 && y!=1) //перемещение для ВЫХ1 и ВЫХ3(в этом случае надо перескочить на другую строку)
+			{
+				LCD_gotoXY(x,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				y--;x=10;punkt--; //уменьшаем координату y(переходим на предыдущюю строку),координата х=10, уменьшаем номер пункта
+				LCD_gotoXY(x,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
+			}
+			else if(x!=0) //перемещение для ВЫХ2 и ВЫХ4(в этом случае надо перейти в соседний пункт на той же строке)
+			{
+				LCD_gotoXY(x,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				punkt--;x-=10; //уменьшаем координату х (ставим курсор на предыдущий пункт),координата y не меняется, уменьшаем номер пункта
+				LCD_gotoXY(x,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
+			}
+			else if(y==1)
+			{
+				LCD_gotoXY(x,y); //идем в текущее положение курсора
+				LCD_putchar(' '); //стрираем старый курсор курсор
+				punkt=3; x=10; y=2;
+				LCD_gotoXY(x,y); //идем в новые координаты для стрелки
+				LCD_putchar(0x84); //идем в новые координаты для стрелки
+			}
+		}
+		break;
+		case ENT:return value; 	//возвращаем новое значение входа
 		break;
 		case ESC:return 0;	//выход по ESC
 		break;
@@ -613,7 +763,7 @@ static void scansys(void)
 
 static void progsys(void)
 {
-	scansys();
+	//scansys();
 	naviMenu(LVL_prog);
 }
 
@@ -748,14 +898,20 @@ static void change_param(unsigned char nParam)
 	unsigned char addr=0,step;
 	signed int param=0,max,staroe=0;
 
-	//scansys();
+	scansys();
 	//считаем кол-во БДЗ инлайн
-	for(unsigned char i=1;i<MAXQDEV;i++) if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL)) {numBDZ++;/*addr=readID(i);*/}
-
+	for(unsigned char i=1;i<MAXQDEV;i++)
+		if(readID(i)==i && chkBit(inSysBDZ[i].flags,INL))
+		{
+			numBDZ++;
+			if(numBDZ==1) addr=readID(i); //если в сети 1 БДЗ, то запоминаем его адресс. если найдет еще БДЗ, адрес дальше будет перезаписан
+		}
+	if (numBDZ==0) return;
 	if (numBDZ>1) addr=numm();//адрес БДЗ в котором будем менять, если addr=0 значит запрос широковещательный
 
 	if(nParam==0 && addr==0) {printUNAVALIABLE();_delay_ms(2000);return;} //нельзя менять адрес во всех БДЗ разом
-	if (addr!=0) //если запрос не широковещательный, то считываем показания БДЗ под № "addr"
+	//если запрос не широковещательный или если в сети 1 БДЗ, то считываем показания БДЗ под № "addr".(если БДЗ 1, то addr=0)
+	if (addr!=0)
 	{
 		if((send_prog(addr,NULL) <0)||(inSysBDZ[addr].data[0] !=PROG))	{printTOUT();_delay_ms(2000);return;}
 	}
@@ -792,7 +948,7 @@ static void change_param(unsigned char nParam)
 	{
 		char str[6];
 		LCD_clr();
-		if(addr!=0)
+		if(staroe!=0)
 		{
 			LCD_gotoXY(0,0);
 			LCD_puts_P(STAROE_ZNACHENIE,16);
@@ -830,9 +986,9 @@ SEND:
 
 	inSysBDZ[addr].data[0]=PROG;
 	switch(nParam)
-	{
+	{		//если адрес не занят, то в поле inSysBDZaddr[param] будет 0, если не 0, то данный адрес уже занят
 	case 0:	if(readID(param)!=0) {LCD_clr(); LCD_gotoXY(0,0);LCD_puts_P(OSHIBKA_ADDR,20);_delay_ms(2000);return;}
-			inSysBDZ[addr].data[1]=param;
+			inSysBDZ[addr].data[1]=param; //если попоали сюда, знчт адрес свободен -> отсылаем его
 	break;
 	case 1:{inSysBDZ[addr].data[2]=param >>8; inSysBDZ[addr].data[3]=param & 0x00FF;}
 	break;
