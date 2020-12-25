@@ -22,8 +22,8 @@ const char EXIT2[]PROGMEM="бшу2:";
 const char EXIT3[]PROGMEM="бшу3:";
 const char EXIT4[]PROGMEM="бшу4:";
 const char WAIT[]PROGMEM="онднфдхре:";
-const char MTZ[]PROGMEM="лрг:";
-const char YPOB[]PROGMEM="спнб:";
+const char MTZ[]PROGMEM="лрг";
+const char YPOB[]PROGMEM="спнб";
 
 const char RABOTA[]PROGMEM="пюанрю1";
 const char AVARIYA[]PROGMEM="юбюпхъ";
